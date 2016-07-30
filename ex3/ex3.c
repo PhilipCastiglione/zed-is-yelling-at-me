@@ -3,7 +3,7 @@
 int main()
 {
   int age = 10;
-  int height = 72;
+  int height;
   double pokemon = 600.5;
 
   printf("I am %d years old.\n", age);
