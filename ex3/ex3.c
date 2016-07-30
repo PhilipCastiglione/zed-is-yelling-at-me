@@ -4,9 +4,11 @@ int main()
 {
   int age = 10;
   int height = 72;
+  double pokemon = 600.5;
 
   printf("I am %d years old.\n", age);
-  printf("I am %d inces tall.\n", height);
+  printf("I am %i inches tall.\n", height);
+  printf("I've caught %e pokemon.\n", pokemon);
 
   return 0;
 }
