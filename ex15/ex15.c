@@ -1,5 +1,13 @@
 #include <stdio.h>
 
+//int main(int argc, char *argv[])
+//{
+  //int a = 5;
+  //int *b = *a;
+  //return 0;
+//}
+
+//int dank(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
   // create two arrays we care about
@@ -25,13 +33,31 @@ int main(int argc, char *argv[])
   int *cur_age = ages;
   char **cur_name = names;
 
+  // from this, it looks like a pointer is a reference to the start of
+  // a block of memory, somehow in an integer type format?
+  // so you can take that reference, add a number of bytes, and then
+  // get to the next reference.
+  // given that ages is an array of ints, they must be stored in
+  // consecutive int sized blocks of memory, so if you reference the
+  // start, then add an int sized block to the reference, you get to
+  // the start of the reference of the next int, if you pointer THAT
+  // with * as below, you just get a reference to taht value. boom.
+
   // second way using pointers
   for(i = 0; i < count; i++) {
     printf("%s is %d years old.\n",
-            *(cur_name+i), *(cur_age+i)); // IS THE LACK OF SPACE AROUND + OPERATOR A THING?
+            //*(cur_name+i), *(cur_age+i));
+            *(cur_name + i), *(cur_age + i)); // operators need spaces pls
   }
 
   printf("---\n");
+
+  // so this is kind of wack. somehow, you can also array reference the pointer,
+  // similarly to how you can add an integer to the pointer, though note that
+  // when you array reference the pointer you immediately get the value of the
+  // memory in the address referred to, without having to use the * operator.
+  // so adding an integer to a int * will give you a new int *, but referencing
+  // an int * with int*[n] will get you *(int* + n).
 
   // third way, pointers are just arrays
   for(i = 0; i < count; i++) {
@@ -40,6 +66,21 @@ int main(int argc, char *argv[])
   }
 
   printf("---\n");
+
+  // basically, wtf. here we assign an int to int * (and the char thing we
+  // brush off as magic because chars are actually just short ints it seems
+  // which is still blow our minds, plus it's a 2D array, but ignoring those
+  // things it's actually basically the same I think). then we do math on
+  // the int * in our sweet loop, and just reference the value with the *
+  // operator in the printf. Actually it's not really magic when you step
+  // through. This is closer to the first pointer example in that we extract
+  // the value from the reference with * rather than [], and we do math on
+  // the reference, just that we are doing math on the reference in the loop.
+  // otherwise it's actually quite similar to that example. oh also obviously
+  // the incrementation is moving the references forward by one int block of
+  // memory at a time which seems awfully convenient. I'm not sure how this
+  // works for both reference types given that one is an int and the other
+  // is a 2D array of chars...
 
   // fourth way with pointers in a stupid complex way
   for(cur_name = names, cur_age = ages;
