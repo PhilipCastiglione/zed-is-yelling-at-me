@@ -3,7 +3,8 @@
 //int main(int argc, char *argv[])
 //{
   //int a = 5;
-  //int *b = *a;
+  //int *b = &a;
+  //printf("%p\n", b); // prints out an awesome memory address
   //return 0;
 //}
 
@@ -32,6 +33,10 @@ int main(int argc, char *argv[])
   // setup the pointers to the start of the arrays
   int *cur_age = ages;
   char **cur_name = names;
+  //int *wat = (int*) names[0];
+  //printf("OMG WAT: %p\n", wat);
+  //int **wot = (int**) names;
+  //printf("OMG WAO: %p\n", wot);
 
   // from this, it looks like a pointer is a reference to the start of
   // a block of memory, somehow in an integer type format?
@@ -45,9 +50,11 @@ int main(int argc, char *argv[])
 
   // second way using pointers
   for(i = 0; i < count; i++) {
+  //for(i = count; i > 0; i--) {
     printf("%s is %d years old.\n",
             //*(cur_name+i), *(cur_age+i));
             *(cur_name + i), *(cur_age + i)); // operators need spaces pls
+            //*(cur_name + i - 1), *(cur_age + i - 1));
   }
 
   printf("---\n");
