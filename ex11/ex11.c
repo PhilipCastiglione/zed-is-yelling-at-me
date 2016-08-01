@@ -10,6 +10,12 @@ int main(int argc, char *argv[])
     i++;
   }
 
+  int j = argc;
+  while(j > 0) {
+    j--;
+    printf("arg %d: %s\n", j, argv[j]);
+  }
+
   // let's make our own array of strings
   char *states[] = {
     "California", "Oregon",
@@ -19,6 +25,13 @@ int main(int argc, char *argv[])
   int num_states = 4;
   i = 0; // watch for this
   while(i < num_states) {
+    printf("state %d: %s\n", i, states[i]);
+    i++;
+  }
+
+  i = 0;
+  while(i < num_states) {
+    states[i] = argv[i];
     printf("state %d: %s\n", i, states[i]);
     i++;
   }
