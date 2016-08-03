@@ -1,5 +1,10 @@
 #include <stdio.h>
 
+int sweet_function(int *full_on_pointer)
+{
+  return *full_on_pointer;
+}
+
 //int main(int argc, char *argv[])
 //{
   //int a = 5;
@@ -11,6 +16,12 @@
 //int dank(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
+  int not_yet_a_pointer = 3;
+  //int check_it = sweet_function(&not_yet_a_pointer);
+  int *totally_a_pointer = &not_yet_a_pointer;
+  int check_it = sweet_function(totally_a_pointer);
+  printf("CHECK! IT! OUT!: %d\n", check_it);
+
   // create two arrays we care about
   int ages[] = {23, 43, 12, 89, 2};
   char *names[] = {
@@ -29,6 +40,24 @@ int main(int argc, char *argv[])
   }
 
   printf("---\n");
+
+  // first way rewritten to use pointers
+  // omg
+  for(i = 0; i < count; i++) {
+    printf("%d ok\n", ages[i]);
+    int *age = &ages[i];
+    printf("%p wow\n", age);
+    printf("%d woa\n", *age);
+
+    printf("%s aok\n", names[i]);
+    char *name = names[i];
+    printf("%p awow\n", name);
+    printf("%s awoa\n", name);
+    printf("%c awoa\n", *name);
+
+    printf("%s, has %d years not dead (yet).\n",
+            name, *age);
+  }
 
   // setup the pointers to the start of the arrays
   int *cur_age = ages;
@@ -59,6 +88,19 @@ int main(int argc, char *argv[])
 
   printf("---\n");
 
+  // second way rewritten to use arrays
+  // easy now
+  int age_yo;
+  char *name_yo;
+  for(i = 0; i < count; i++) {
+    age_yo = *(cur_age + i);
+    name_yo = *(cur_name + i);
+    printf("don't even care %d\n",
+            age_yo);
+    printf("for reals %s\n",
+            name_yo);
+  }
+  
   // so this is kind of wack. somehow, you can also array reference the pointer,
   // similarly to how you can add an integer to the pointer, though note that
   // when you array reference the pointer you immediately get the value of the
@@ -97,6 +139,11 @@ int main(int argc, char *argv[])
     printf("%s lived %d years so far.\n",
             *cur_name, *cur_age);
   }
+
+  int forgot = 5;
+  printf("%d\n", forgot--);
+  printf("%d\n", --forgot);
+  printf("%d\n", forgot);
 
   return 0;
 }
