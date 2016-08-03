@@ -44,11 +44,15 @@ void Person_destroy(struct Person *who)
   // or is it Zed not demonstrating everything
   // probably the former
   free(who->name);
-  //POSTSCRIPT it's because strdup is duplication! a whole new mem alloc
   //free(who->name);
   free(who);
 }
 
+void real_Person_destroy(struct Person person)
+{
+  //free(person); // this shouldn't work
+  //free(&person); // apparently this wasn't a great idea
+}
 // function with no return value called Person_print that takes a pointer to a person
 void Person_print(struct Person *who)
 {
@@ -59,42 +63,68 @@ void Person_print(struct Person *who)
   printf("\tWeight: %d\n", who->weight);
 }
 
+void real_Person_print(struct Person person)
+{
+  printf("Name: %s\n", person.name);
+  printf("\tAge: %d\n", person.age);
+  printf("\tHeight: %d\n", person.height);
+  printf("\tWeight: %d\n", person.weight);
+}
+
 int main(int argc, char *argv[])
 {
   //ZED make two people structures
-  struct Person *joe = Person_create(
-          "Joe Shmalex", 32, 64, 140);
+  // NOW: ON THE STACK
+  //struct Person *joe = Person_create(
+          //"Joe Shmalex", 32, 64, 140);
 
-  struct Person *frank = Person_create(
-          "Frank Shmlank", 20, 72, 180);
+  //struct Person *frank = Person_create(
+          //"Frank Shmlank", 20, 72, 180);
+  struct Person alice;
+  alice.name = "Alice";
+  alice.age = 12;
+  alice.height = 56;
+  alice.weight = 80;
 
   //ZED print them out and where they are in memory
-  printf("Joe is at memory location %p:\n", joe);
-  Person_print(joe);
+  //printf("Joe is at memory location %p:\n", joe);
+  //Person_print(joe);
 
-  printf("Frank is at memory location %p:\n", frank);
-  Person_print(frank);
+  //printf("Frank is at memory location %p:\n", frank);
+  //Person_print(frank);
+
+  printf("Alice is at memory location %p:\n", &alice);
+  //Person_print(&alice);
+  real_Person_print(alice);
 
   //ZED make everyone age 20 years and print them again
   // since zed says make everyone 20, += must do something weird here
   // must allocate from 0?
-  joe->age += 20;
+  //joe->age += 20;
   //POSTSCRIPT no this does exactly what you'd expect and zed's comment is just weird
-  //POSTSCRIPT OH as in age the verb silly
   // wait except does this mean height will be -2?
-  joe->height -= 2;
-  //POSTSCRIPT no this does exactly what you'd expect
-  joe->weight += 40;
-  Person_print(joe);
+  //joe->height -= 2;
+  //POSTSCRIPT no this does exactly what you'd expect and zed's comment is just weird
+  //joe->weight += 40;
+  //Person_print(joe);
 
-  frank->age += 20;
-  frank->weight +=20;
-  Person_print(frank);
+  //frank->age += 20;
+  //frank->weight +=20;
+  //Person_print(frank);
+
+  alice.age += 20;
+  alice.height +=9;
+  alice.weight +=50;
+  //Person_print(&alice);
+  real_Person_print(alice);
 
   //ZED destroy them both so we clean up
-  Person_destroy(joe);
-  Person_destroy(frank);
+  //Person_destroy(joe);
   //Person_destroy(frank);
+  //Person_destroy(frank);
+
+  //Person_destroy(&alice);
+  real_Person_destroy(alice);
 
   //Person_destroy(NULL);
   //Person_print(NULL);
