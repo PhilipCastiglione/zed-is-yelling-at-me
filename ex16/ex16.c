@@ -44,6 +44,7 @@ void Person_destroy(struct Person *who)
   // or is it Zed not demonstrating everything
   // probably the former
   free(who->name);
+  //free(who->name);
   free(who);
 }
 
@@ -91,6 +92,9 @@ int main(int argc, char *argv[])
   //ZED destroy them both so we clean up
   Person_destroy(joe);
   Person_destroy(frank);
+  //Person_destroy(frank);
 
+  //Person_destroy(NULL);
+  //Person_print(NULL);
   return 0;
 }
