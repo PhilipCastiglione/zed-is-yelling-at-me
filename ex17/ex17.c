@@ -35,8 +35,11 @@ struct Connection {
   struct Database *db;
 };
 
+// forward declaration pls
+void Database_close(struct Connection *conn);
+
 // log and exit error handling funcion
-void die(const char *message)
+void die(const char *message, struct Connection *conn)
 {
   if(errno) { // ie unless errno is 0 (has not been set)
     // prints a preset message determines by the value of errno,
@@ -46,6 +49,11 @@ void die(const char *message)
     // so if errno wasn't set, we default here instead
     printf("ERROR: %s\n", message);
   }
+
+  // CLOSE OUR SHIT
+  // make sure you don't catch things with die in close, or we
+  // get the old infinite call stack derpathon
+  Database_close(conn);
 
   // exits and provides and error code (rather than 0, success code)
   // to the OS
@@ -71,7 +79,7 @@ void Database_load(struct Connection *conn)
   // method signature: size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
   // fread returns the number of read files (should be 1 here, and match nmemb generally)
-  if(rc != 1) die("Failed to load database.");
+  if(rc != 1) die("Failed to load database.", conn);
 }
 
 // "opens a connection" ie. allocates the memory required and returns
@@ -80,12 +88,12 @@ struct Connection *Database_open(const char *filename, char mode)
 {
   // get an empty struct of the right size
   struct Connection *conn = malloc(sizeof(struct Connection));
-  if(!conn) die("Memory error"); // not sure how this would even happen
+  if(!conn) die("Memory error", conn); // not sure how this would even happen
 
   // make the db attribute of conn be the right size (memory alloc)
   // for a Database struct
   conn->db = malloc(sizeof(struct Database));
-  if(!conn->db) die("Memory error"); // maybe malloc can fail somehow?
+  if(!conn->db) die("Memory error", conn); // maybe malloc can fail somehow?
 
   // have to split file opening method based on read/write,
   // mode c will 'create' ie write the file
@@ -101,7 +109,7 @@ struct Connection *Database_open(const char *filename, char mode)
     }
   }
 
-  if(!conn->file) die("Failed to open the file");
+  if(!conn->file) die("Failed to open the file", conn);
 
   return conn;
 }
@@ -127,13 +135,13 @@ void Database_write(struct Connection *conn)
   // the contents of the array at the pointer addr and writes it to
   // the file stream
   int rc = fwrite(conn->db, sizeof(struct Database), 1, conn->file);
-  if(rc != 1) die("Failed to write database.");
+  if(rc != 1) die("Failed to write database.", conn);
 
   // fflush "flushes the output buffer of a (file?) stream. I guess
   // this must be important to remove it from memory?
   // returns 0 on success
   rc = fflush(conn->file);
-  if(rc == -1) die("Cannot flush database.");
+  if(rc == -1) die("Cannot flush database.", conn);
 }
 
 // fills the conn's db's rows with Addresses that have content equal
@@ -163,7 +171,7 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 {
   // pointer to the addr in the row we want
   struct Address *addr = &conn->db->rows[id];
-  if(addr->set) die("Already set delete it first");
+  if(addr->set) die("Already set delete it first", conn);
 
   // the addr is now considered "set" right.. this is a C bool basically?
   addr->set = 1;
@@ -179,11 +187,11 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
   char *res = strncpy(addr->name, name, MAX_DATA);
   res[MAX_DATA - 1] = '\0'; // this is my line to make the strncpy safe for >512 bytes
   //ZED demonstrate the strncpy bug
-  if(!res) die("Name copy failed");
+  if(!res) die("Name copy failed", conn);
 
   res = strncpy(addr->email, email, MAX_DATA);
   res[MAX_DATA - 1] = '\0'; // this is my line to make the strncpy safe for >512 bytes
-  if(!res) die("Email copy failed");
+  if(!res) die("Email copy failed", conn);
 }
 
 // read the contents of the addr in the specified row by id
@@ -195,7 +203,7 @@ void Database_get(struct Connection *conn, int id)
   if(addr->set) {
     Address_print(addr);
   } else {
-    die("ID is not set");
+    die("ID is not set", conn);
   }
 }
 
@@ -227,7 +235,7 @@ void Database_list(struct Connection *conn)
 // attempt the db command
 int main(int argc, char *argv[])
 {
-  if(argc < 3) die("USAGE: ex17 <dbfile> <action> [action params]");
+  if(argc < 3) die("USAGE: ex17 <dbfile> <action> [action params]", NULL);
 
   // initializes from cli args specifying the db file, action, params
   char *filename = argv[1];
@@ -242,7 +250,7 @@ int main(int argc, char *argv[])
   // TRY CHECKING what typecasting with (int) would do?
   // answer: bad things
   if(argc > 3) id = atoi(argv[3]);
-  if(id >= MAX_ROWS) die("There's not that many records.");
+  if(id >= MAX_ROWS) die("There's not that many records.", conn);
 
   // wat u wan bb?
   switch(action) {
@@ -252,20 +260,20 @@ int main(int argc, char *argv[])
       break;
 
     case 'g':
-      if(argc != 4) die("Need an id to get");
+      if(argc != 4) die("Need an id to get", conn);
 
       Database_get(conn, id);
       break;
 
     case 's':
-      if(argc != 6) die("Need id, name, email to set");
+      if(argc != 6) die("Need id, name, email to set", conn);
 
       Database_set(conn, id, argv[4], argv[5]);
       Database_write(conn);
       break;
 
     case 'd':
-      if(argc != 4) die("Need id to delete");
+      if(argc != 4) die("Need id to delete", conn);
 
       Database_delete(conn, id);
       Database_write(conn);
@@ -275,7 +283,7 @@ int main(int argc, char *argv[])
       Database_list(conn);
       break;
     default:
-      die("Invalid action, only: c=create, g=get, s=set, d=del, l=list");
+      die("Invalid action, only: c=create, g=get, s=set, d=del, l=list", conn);
   }
 
   Database_close(conn);
