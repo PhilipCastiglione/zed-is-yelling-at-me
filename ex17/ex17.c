@@ -69,8 +69,7 @@ void Address_print(struct Address *addr)
           addr->id, addr->name, addr->email);
 }
 
-// reads the file into connection's attributes or something?
-// to load it into memory? look up fread
+// loads the db from the file into conn
 void Database_load(struct Connection *conn)
 {
   // 4 multifreading ur pogram
@@ -125,7 +124,7 @@ void Database_close(struct Connection *conn)
   }
 }
 
-// writes a record to the database at the start of the file
+// writes the database to the file
 void Database_write(struct Connection *conn)
 {
   // takes the file position pointer to the beginning of the stream
@@ -231,6 +230,21 @@ void Database_list(struct Connection *conn)
   }
 }
 
+void Database_find(struct Connection *conn, char *name)
+{
+  struct Database *db = conn->db;
+
+  for(int i = 0; i < MAX_ROWS; i++) {
+    struct Address *dis_one = &db->rows[i];
+
+    if(!strcmp(dis_one->name, name)) {
+      Address_print(dis_one);
+      return;
+    }
+  }
+  die("Record with that name not found yo", conn);
+}
+
 // fork from the number of args and the case to either fail or
 // attempt the db command
 int main(int argc, char *argv[])
@@ -243,14 +257,19 @@ int main(int argc, char *argv[])
   // this pointer for conn will be passed around containing reference
   // to everything, pretty magical c pointer stuff, this
   struct Connection *conn = Database_open(filename, action);
-  int id = 0;
+  char *name;
+  int id;
 
   // atoi is string to int - not quite sure why a? a for alpha maybe?
   // anyhow this is just .to_i
   // TRY CHECKING what typecasting with (int) would do?
   // answer: bad things
-  if(argc > 3) id = atoi(argv[3]);
-  if(id >= MAX_ROWS) die("There's not that many records.", conn);
+  if(action == 'f') {
+    name = argv[3];
+  } else {
+    if(argc > 3) id = atoi(argv[3]);
+    if(id >= MAX_ROWS) die("There's not that many records.", conn);
+  }
 
   // wat u wan bb?
   switch(action) {
@@ -282,6 +301,13 @@ int main(int argc, char *argv[])
     case 'l':
       Database_list(conn);
       break;
+
+    case 'f':
+      if(argc != 4) die("Need name to find record", conn);
+
+      Database_find(conn, name);
+      break;
+
     default:
       die("Invalid action, only: c=create, g=get, s=set, d=del, l=list", conn);
   }

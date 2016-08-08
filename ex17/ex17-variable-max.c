@@ -119,7 +119,7 @@ void Database_close(struct Connection *conn)
   }
 }
 
-// writes a record to the database at the start of the file
+// writes the whole database to the file!! previous comment was wrong
 void Database_write(struct Connection *conn)
 {
   // takes the file position pointer to the beginning of the stream
@@ -146,14 +146,11 @@ void Database_write(struct Connection *conn)
 // the right attrs and everything already being there, rather than
 // having to check if it exists and try and create if it doesn't,
 // or just update etc etc
-void Database_create(struct Connection *conn, int max_data, int max_rows)
+void Database_create(struct Connection *conn)
 {
-  conn->db->max_data = max_data;
-  conn->db->max_rows = max_rows;
-  
   int i = 0;
 
-  for(i = 0; i < max_rows; i++) {
+  for(i = 0; i < conn->db->max_rows; i++) {
     // make a prototype to initialize it
     struct Address addr = {.id = i, .set = 0};
     // then just assign it
@@ -242,19 +239,20 @@ int main(int argc, char *argv[])
   struct Connection *conn = Database_open(filename, action);
   int id = 0;
 
-  // atoi is string to int - not quite sure why a? a for alpha maybe?
-  // anyhow this is just .to_i
-  // TRY CHECKING what typecasting with (int) would do?
-  // answer: bad things
-  if(argc > 3) id = atoi(argv[3]);
-  if(id >= conn->db->max_rows && action != 'c') die("There's not that many records.");
+  if(action == 'c') {
+    conn->db->max_data = atoi(argv[3]);
+    conn->db->max_rows = atoi(argv[4]);
+  } else {
+    if(argc > 3) id = atoi(argv[3]);
+    if(id >= conn->db->max_rows) die("There's not that many records.");
+  }
 
   // wat u wan bb?
   switch(action) {
     case 'c':
       if(argc != 5) die("Need max data and max rows pls");
 
-      Database_create(conn, id /* me lazy :3 */, atoi(argv[4]));
+      Database_create(conn);
       Database_write(conn);
       break;
 
