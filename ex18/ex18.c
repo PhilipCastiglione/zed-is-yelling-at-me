@@ -18,6 +18,7 @@ void die(const char *message)
 // a typedef creates a fake type, in this
 // case for a function pointer
 typedef int (*compare_cb) (int a, int b);
+typedef int *(*algo) (int *numbers, int count, compare_cb cmp);
 
 /**
  * A classic bubble sort function that uses the
@@ -28,7 +29,7 @@ int *bubble_sort(int *numbers, int count, compare_cb cmp)
   int temp = 0;
   int i = 0;
   int j = 0;
-  int *target = malloc(count *sizeof(int));
+  int *target = malloc(count * sizeof(int));
 
   if(!target) die("Memory error.");
 
@@ -42,6 +43,37 @@ int *bubble_sort(int *numbers, int count, compare_cb cmp)
         target[j] = temp;
       }
     }
+  }
+
+  return target;
+}
+
+int *made_it_up_sort(int *numbers, int count, compare_cb cmp)
+{
+  int temp = 0;
+  int idx = 0;
+  int i = 0;
+  int j = 0;
+  int *target = malloc(count * sizeof(int));
+
+  if(!target) die("Memory error.");
+
+  memcpy(target, numbers, count * sizeof(int));
+
+  for(i = 0; i < count; i++)
+  {
+    idx = i;
+    temp = target[idx]; 
+    for(j = i + 1; j < count; j++)
+    {
+      //if(target[j] < target[idx])
+      if(cmp(target[idx], target[j]) > 0)
+      {
+        idx = j;
+      }
+    }
+    target[i] = target[idx];
+    target[idx] = temp;
   }
 
   return target;
@@ -70,10 +102,10 @@ int strange_order(int a, int b)
  * Used to test that we are sorting things correctly
  * by doig the sort and printing it out.
  */
-void test_sorting(int *numbers, int count, compare_cb cmp)
+void test_sorting(algo sorting_algo,int *numbers, int count, compare_cb cmp)
 {
   int i = 0;
-  int *sorted = bubble_sort(numbers, count, cmp);
+  int *sorted = sorting_algo(numbers, count, cmp);
 
   if(!sorted) die("Failed to sort as requested.");
 
@@ -83,7 +115,21 @@ void test_sorting(int *numbers, int count, compare_cb cmp)
   printf("\n");
 
   free(sorted);
+
+  // prints out the raw assembler byte code of the function?
+  //unsigned char *data = (unsigned char*)cmp;
+
+  //for(i = 0; i < 25; i++) {
+    //printf("%02x:", data[i]);
+  //}
+
+  //printf("\n");
 }
+
+//void nope(char a)
+//{
+  //printf("Nope! %c\n", a);
+//}
 
 int main(int argc, char *argv[])
 {
@@ -100,9 +146,14 @@ int main(int argc, char *argv[])
     numbers[i] = atoi(inputs[i]);
   }
 
-  test_sorting(numbers, count, sorted_order);
-  test_sorting(numbers, count, reverse_order);
-  test_sorting(numbers, count, strange_order);
+  test_sorting(bubble_sort, numbers, count, sorted_order);
+  test_sorting(bubble_sort, numbers, count, reverse_order);
+  test_sorting(bubble_sort, numbers, count, strange_order);
+  //test_sorting(numbers, count, nope);
+  //test_sorting(numbers, count, NULL);
+  test_sorting(made_it_up_sort, numbers, count, sorted_order);
+  test_sorting(made_it_up_sort, numbers, count, reverse_order);
+  test_sorting(made_it_up_sort, numbers, count, strange_order);
 
   free(numbers);
 
