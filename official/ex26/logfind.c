@@ -3,9 +3,12 @@
 
 int main(int argc, char *argv[])
 {
-    printf("Hello, world!\n");
-    
     // handle args (with -o)
+    if (argc == 1 || (argc == 2 && strcmp(argv[1], "-o") == 0)) {
+      printf("USAGE: logfind [-o] <words> <to> <find>\n");
+      printf("       Note that default search is AND, -o uses OR\n");
+    }
+
     // check ~/.logfile for list
     // permit glob
 
