@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <glob.h>
 
 #include "dbg.h"
 
 #define PATH_MAX 255
 
+// TODO: factor this out into functions
 int main(int argc, char *argv[])
 {
     // define terms pointer early so it is initialized in all cases
@@ -54,8 +56,9 @@ int main(int argc, char *argv[])
     {
         ch = fgetc(logfile);
         line_length++;
-        check(line_length < PATH_MAX,
-              "Cannot use paths of more than %d characters", PATH_MAX);
+        check(line_length < PATH_MAX - strlen(home_dir),
+              "Cannot use paths of more than %d characters",
+              PATH_MAX - strlen(home_dir));
         if (ch == '\n')
         {
             log_dir_c++;
@@ -74,6 +77,10 @@ int main(int argc, char *argv[])
         check(strcmp(log_dirs[i], "") != 0, "Logfile line %d is empty.\n", i);
     }
 
+    // TODO: replace any ~ with homedir
+    // TODO: GLOB WILL DAEL WITH THIS, YOU CAN REMOVE IT FROM THE ABOVE AND GLOBGLOBGLOB
+
+    // TODO: remove debug printing
     for (int i = 0; i < log_dir_c; i++)
     {
         printf("%s\n", log_dirs[i]);
@@ -81,6 +88,7 @@ int main(int argc, char *argv[])
 
     // TODO: permit glob
 
+    // TODO:
     // scan the files
     // output the filename being searched
     // FIRST PASS: check the file has the words with AND/OR
